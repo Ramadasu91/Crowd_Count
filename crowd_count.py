@@ -1,9 +1,8 @@
 import streamlit as st
 import cv2
-import torch
-from ultralytics import YOLO
-from PIL import Image
 import numpy as np
+from PIL import Image
+from ultralytics import YOLO
 
 # Load YOLOv5 model for person detection
 model = YOLO('yolov5s.pt')  # Pre-trained YOLO model for person detection
@@ -44,28 +43,28 @@ def detect_people_and_faces(frame):
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box for person
                     cv2.putText(frame, 'Person', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
     
-    # Return the count of people and faces in the current frame
-    current_frame_people_count = people_count + face_count
-    return current_frame_people_count, frame
+    # Return the total count of people (both detected faces and persons)
+    total_people_count = people_count + face_count
+    return total_people_count, frame
 
-# Initialize session state variables for controls
+# Initialize session state variables
 if "run" not in st.session_state:
     st.session_state.run = False
 if "pause" not in st.session_state:
     st.session_state.pause = False
+if "frame" not in st.session_state:
+    st.session_state.frame = None
 
-# Streamlit app for real-time webcam feed with face and person detection
-st.title("Real-time People & Face Detection with YOLOv5 and Stream Controls")
-st.write("This app uses your webcam to detect people and faces in real-time.")
+# Streamlit app for webcam input with face and person detection
+st.title("Webcam Face & Person Detection with YOLOv5")
 
 # Buttons for controls
 start_button = st.button("Start Webcam")
-pause_button = st.button("Pause/Resume")
+pause_button = st.button("Pause")
 stop_button = st.button("Stop Webcam")
 
-# Placeholder to display the video feed and detection count
-stframe = st.empty()
-current_people_count_display = st.empty()
+# Webcam input
+camera_input = st.camera_input("Capture Image", key="camera_input")
 
 # Logic to handle controls
 if start_button:
@@ -74,39 +73,30 @@ if start_button:
 
 if stop_button:
     st.session_state.run = False
+    st.session_state.pause = False
+    st.session_state.frame = None  # Clear the frame when stopped
 
 if pause_button:
     st.session_state.pause = not st.session_state.pause  # Toggle pause state
 
-# Start video capture when the user presses the "Start Webcam" button
-if st.session_state.run:
-    video_capture = cv2.VideoCapture(0)  # 0 is the default webcam
+if camera_input:
+    # Convert the captured image to OpenCV format
+    image = Image.open(camera_input)
+    frame = np.array(image)
+    frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    if not video_capture.isOpened():
-        st.error("Unable to access the camera")
-    else:
-        st.write("Webcam is running. Use the controls to pause, resume, or stop.")
+    if st.session_state.run:
+        # If not paused, process the frame
+        if not st.session_state.pause:
+            # Detect people and faces in the current frame
+            people_count, frame_with_detections = detect_people_and_faces(frame_bgr)
 
-        while st.session_state.run:
-            ret, frame = video_capture.read()
-            if not ret:
-                break
+            # Convert the frame to RGB for display in Streamlit
+            frame_rgb = cv2.cvtColor(frame_with_detections, cv2.COLOR_BGR2RGB)
+            frame_pil = Image.fromarray(frame_rgb)
 
-            # If paused, do not process new frames, just display the last frame
-            if not st.session_state.pause:
-                # Detect people and faces in the current frame
-                current_people_count, frame_with_detections = detect_people_and_faces(frame)
+            # Display the frame with detections
+            st.image(frame_pil, caption="Detected People & Faces", use_column_width=True)
+            st.write(f"People detected: {people_count}")
 
-                # Convert the frame to RGB (Streamlit expects RGB format)
-                frame_rgb = cv2.cvtColor(frame_with_detections, cv2.COLOR_BGR2RGB)
-                frame_pil = Image.fromarray(frame_rgb)
-
-                # Update the Streamlit frame and people count
-                stframe.image(frame_pil, caption="Webcam Feed with Face and Person Detection", use_column_width=True)
-                current_people_count_display.text(f"People detected in current frame: {current_people_count}")
-            else:
-                # If paused, continue showing the last frame without updating
-                stframe.image(frame_pil, caption="Paused Frame", use_column_width=True)
-
-        # Release the video capture object once done or stopped
-        video_capture.release()
+    st.session_state.frame = frame
