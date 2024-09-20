@@ -65,7 +65,7 @@ def main():
 
         # Create a temporary file to save the output video
         temp_output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
-        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility with Streamlit
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'avc1' codec for better compatibility with Streamlit
         video_writer = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
 
         # Process each frame in the video
