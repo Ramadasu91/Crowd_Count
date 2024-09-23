@@ -1,14 +1,12 @@
-# File: app.py
-
 import streamlit as st
 import cv2
 import torch
 from ultralytics import YOLO
 import tempfile
-import io  # In-memory file handling
+import io
 
-# Load YOLOv5 model
-model = YOLO('yolov5s.pt')  # Load YOLOv5s model
+# Load the YOLOv5 model (make sure 'yolov5s.pt' is in the right location or available)
+model = YOLO('yolov5s.pt')
 
 # Function to detect people and draw bounding boxes
 def detect_and_count_people(frame):
@@ -30,22 +28,18 @@ def detect_and_count_people(frame):
             x1, y1, x2, y2 = map(int, boxes[i])  # Bounding box coordinates
             confidence = confs[i].item()  # Confidence score
 
-            # Draw bounding box around the detected person
+            # Draw bounding box and confidence score on the frame
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box for person
-
-            # Optionally display confidence score on the bounding box
             cv2.putText(frame, f'{confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
     return frame, people_count
 
 # Streamlit application
 def main():
-    # Streamlit UI
-    st.set_page_config(page_title="Skavch Crowd Count Engine", layout="wide")
-
-    # Add an image to the header
-    st.image("bg1.jpg", use_column_width=True)  # Adjust the image path as necessary
-    st.title("Skavch Crowd Count Engine")
+    # Streamlit UI configuration
+    st.set_page_config(page_title="Person Detection and Counting", layout="wide")
+    
+    st.title("Person Detection and Counting in Video")
 
     # File uploader to upload a video
     video_file = st.file_uploader("Upload a video", type=["mp4", "avi", "mov", "mkv"])
@@ -68,7 +62,7 @@ def main():
 
         # Create an in-memory buffer to save the output video
         output_buffer = io.BytesIO()
-        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # More compatible codec for cloud environments
         temp_output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
         video_writer = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
 
