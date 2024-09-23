@@ -37,9 +37,11 @@ def detect_and_count_people(frame):
 # Streamlit application
 def main():
     # Streamlit UI configuration
-    st.set_page_config(page_title="Person Detection and Counting", layout="wide")
-    
-    st.title("Person Detection and Counting in Video")
+     st.set_page_config(page_title="Skavch Crowd Count Engine", layout="wide")
+
+    # Add an image to the header
+    st.image("bg1.jpg", use_column_width=True)  # Adjust the image path as necessary
+    st.title("Skavch Crowd Count Engine")
 
     # File uploader to upload a video
     video_file = st.file_uploader("Upload a video", type=["mp4", "avi", "mov", "mkv"])
