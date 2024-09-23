@@ -5,6 +5,7 @@ import cv2
 import torch
 from ultralytics import YOLO
 import tempfile
+import io  # In-memory file handling
 
 # Load YOLOv5 model
 model = YOLO('yolov5s.pt')  # Load YOLOv5s model
@@ -62,10 +63,10 @@ def main():
         width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Create a temporary file to save the output video
-        temp_output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
-        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility with Streamlit
-        video_writer = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
+        # Create an in-memory buffer to save the output video
+        output_buffer = io.BytesIO()
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility
+        video_writer = cv2.VideoWriter(temp_video_path, fourcc, fps, (width, height))
 
         # Process each frame in the video
         while True:
@@ -86,11 +87,16 @@ def main():
         video_capture.release()
         video_writer.release()
 
+        # Read the video file back into memory and store it in the buffer
+        with open(temp_video_path, 'rb') as f:
+            output_buffer.write(f.read())
+
+        output_buffer.seek(0)  # Reset buffer position to the start
+
         st.text(f"Video processing complete!")
 
-        # Provide a download button for the output video without displaying it
-        with open(temp_output_path, 'rb') as f:
-            st.download_button('Download Processed Video', f, file_name="output_video.mp4")
+        # Provide a download button for the in-memory video buffer
+        st.download_button('Download Processed Video', output_buffer, file_name="output_video.mp4", mime='video/mp4')
 
 if __name__ == '__main__':
     main()
