@@ -37,7 +37,7 @@ def detect_and_count_people(frame):
 # Streamlit application
 def main():
     # Streamlit UI configuration
-     st.set_page_config(page_title="Skavch Crowd Count Engine", layout="wide")
+    st.set_page_config(page_title="Skavch Crowd Count Engine", layout="wide")
 
     # Add an image to the header
     st.image("bg1.jpg", use_column_width=True)  # Adjust the image path as necessary
