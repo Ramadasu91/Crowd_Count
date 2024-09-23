@@ -24,9 +24,9 @@ def detect_and_count_people(frame):
         if class_id == 0:  # Class ID 0 corresponds to 'person' in YOLOv5
             people_count += 1
 
-            # Get bounding box coordinates and confidence score
+            # Get bounding box coordinates 
             x1, y1, x2, y2 = map(int, boxes[i])  # Bounding box coordinates
-            confidence = confs[i].item()  # Confidence score
+            
 
             # Draw bounding box and confidence score on the frame
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box for person
