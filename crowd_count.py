@@ -30,7 +30,7 @@ def detect_and_count_people(frame):
 
             # Draw bounding box and confidence score on the frame
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box for person
-            cv2.putText(frame, f'{confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+           
 
     return frame, people_count
 
