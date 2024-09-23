@@ -30,8 +30,11 @@ def detect_and_count_people(frame):
             x1, y1, x2, y2 = map(int, boxes[i])  # Bounding box coordinates
             confidence = confs[i].item()  # Confidence score
 
-            # Draw bounding box and confidence score on the frame
+            # Draw bounding box around the detected person
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box for person
+
+            # Optionally display confidence score on the bounding box
+            cv2.putText(frame, f'{confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
     return frame, people_count
 
@@ -66,7 +69,8 @@ def main():
         # Create an in-memory buffer to save the output video
         output_buffer = io.BytesIO()
         fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility
-        video_writer = cv2.VideoWriter(temp_video_path, fourcc, fps, (width, height))
+        temp_output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
+        video_writer = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
 
         # Process each frame in the video
         while True:
@@ -88,7 +92,7 @@ def main():
         video_writer.release()
 
         # Read the video file back into memory and store it in the buffer
-        with open(temp_video_path, 'rb') as f:
+        with open(temp_output_path, 'rb') as f:
             output_buffer.write(f.read())
 
         output_buffer.seek(0)  # Reset buffer position to the start
