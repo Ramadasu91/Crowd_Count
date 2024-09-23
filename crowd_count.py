@@ -5,7 +5,6 @@ import cv2
 import torch
 from ultralytics import YOLO
 import tempfile
-import os
 
 # Load YOLOv5 model
 model = YOLO('yolov5s.pt')  # Load YOLOv5s model
@@ -65,7 +64,7 @@ def main():
 
         # Create a temporary file to save the output video
         temp_output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'avc1' codec for better compatibility with Streamlit
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Use 'avc1' codec for better compatibility with Streamlit
         video_writer = cv2.VideoWriter(temp_output_path, fourcc, fps, (width, height))
 
         # Process each frame in the video
@@ -89,11 +88,7 @@ def main():
 
         st.text(f"Video processing complete!")
 
-        # Read the processed video and display it in Streamlit
-        with open(temp_output_path, 'rb') as f:
-            st.video(f.read())
-
-        # Provide a download button for the output video
+        # Provide a download button for the output video without displaying it
         with open(temp_output_path, 'rb') as f:
             st.download_button('Download Processed Video', f, file_name="output_video.mp4")
 
